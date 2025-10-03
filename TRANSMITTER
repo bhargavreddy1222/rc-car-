@@ -1,1 +1,39 @@
 
+#include <RF24.h>
+RF24 radio(8,10);
+const byte address[6] = "00001";
+const int potpin1 = A0;//analog pin1
+const int potpin2 = A1;//analog pin2
+int toggleswitch = 5;
+
+struct dataPacket {
+  int potvalue1;
+  int potvalue2;
+  int switchstate;
+};
+dataPacket send_data;
+
+void setup() {
+// put your setup code here, to run once:
+//radio syntax
+ radio.begin();
+ radio.openWritingPipe(address);
+ radio.setPALevel(RF24_PA_MIN);
+ radio.setDataRate(RF24_250KBPS);
+ radio.stopListening();
+pinMode (toggleswitch, INPUT_PULLUP);//toggle role
+} 
+
+void loop() {// put your main code here, to run repeatedly:
+//potenatio ones
+  int potvalue1 = analogRead(potpin1);
+  send_data.potvalue1 = potvalue1;//reading potentiometer value for streeing
+  int potvalue2 = analogRead(potpin2);
+  send_data.potvalue2 = potvalue2;//reading potentiometer value for aiming
+//toggle switch
+  int toggleState = digitalRead(toggleswitch);  
+  send_data.switchstate = toggleState;
+  //button
+radio.write(&send_data, sizeof(send_data));
+
+}
